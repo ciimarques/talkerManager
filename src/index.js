@@ -6,15 +6,28 @@ const app = express();
 app.use(express.json());
 
 const HTTP_OK_STATUS = 200;
+const HTTP_NOT_FOUND_STATUS = 404;
 const PORT = process.env.PORT || '3001';
 
-app.get('/talker', async (_request, response) => {
-  try {
-    const data = await fs.readFile(path.resolve(__dirname, 'talker.json'), 'utf-8');
-    const palestrantes = JSON.parse(data);
-    response.status(HTTP_OK_STATUS).json(palestrantes);
-  } catch (error) {
-    response.status(HTTP_OK_STATUS).json([]);
+const loadTalkers = async () => {
+  const data = await fs.readFile(path.resolve(__dirname, 'talker.json'), 'utf-8');
+  return JSON.parse(data);
+};
+
+app.get('/talker', async (_request, response) => { 
+  const talkers = await loadTalkers();
+  response.status(HTTP_OK_STATUS).json(talkers);
+});
+
+app.get('/talker/:id', async (request, response) => {
+  const { id } = request.params;
+  const talkers = await loadTalkers();
+  const talkerFind = talkers
+    .find((talker) => talker.id === id);
+  if (talkerFind) {
+    response.status(HTTP_OK_STATUS).json(talkerFind);
+  } else {
+    response.status(HTTP_NOT_FOUND_STATUS).json({ message: 'Pessoa palestrante não encontrada' });
   }
 });
 // não remova esse endpoint, e para o avaliador funcionar
