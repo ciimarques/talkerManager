@@ -58,6 +58,25 @@ app.post('/talker', authenticateToken, validateTalker, async (req, res) => {
     res.status(500).send('Erro interno do servidor');
   }
 });
+app.put('/talker/:id', authenticateToken, validateTalker, async (req, res) => {
+  const { id } = req.params;
+  const updatedTalker = req.body;
+  const idNumber = parseInt(id, 10);
+  const talkers = await loadTalkers();
+  const talkerIndex = talkers.findIndex((talker) => talker.id === idNumber);
+  if (talkerIndex === -1) {
+    return res.status(HTTP_NOT_FOUND_STATUS).json({
+      message: 'Pessoa palestrante não encontrada', 
+    });
+  }
+  talkers[talkerIndex] = { ...talkers[talkerIndex], ...updatedTalker };
+  await fs.writeFile(
+    path.resolve(__dirname, 'talker.json'), 
+    JSON.stringify(talkers, null, 2),
+    'utf-8',
+  );
+  res.status(HTTP_OK_STATUS).json(talkers[talkerIndex]);
+});
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
