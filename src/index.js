@@ -23,6 +23,17 @@ app.get('/talker', async (_request, response) => {
   response.status(HTTP_OK_STATUS).json(talkers);
 });
 
+app.get('/talker/search', authenticateToken, async (req, res) => {
+  const searchTerm = req.query.q || '';
+
+  const talkers = await loadTalkers();
+  const filteredTalkers = searchTerm
+    ? talkers.filter((talker) => talker.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    : talkers;
+
+  res.status(200).json(filteredTalkers);
+});
+
 app.get('/talker/:id', async (request, response) => {
   const { id } = request.params;
   const idNumber = parseInt(id, 10);
