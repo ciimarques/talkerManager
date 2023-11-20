@@ -78,6 +78,24 @@ app.put('/talker/:id', authenticateToken, validateTalker, async (req, res) => {
   res.status(HTTP_OK_STATUS).json(talkers[talkerIndex]);
 });
 
+app.delete('/talker/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const idNumber = parseInt(id, 10);
+
+  const talkers = await loadTalkers();
+  const talkerIndex = talkers.findIndex((talker) => talker.id === idNumber);
+
+  talkers.splice(talkerIndex, 1);
+
+  await fs.writeFile(
+    path.resolve(__dirname, 'talker.json'), 
+    JSON.stringify(talkers, null, 2),
+    'utf-8',
+  );
+
+  res.status(204).send();
+});
+
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
