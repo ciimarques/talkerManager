@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
 const generateToken = require('./utils/token');
+const validateRequest = require('./middlewares/validationMiddleware');
 
 const app = express();
 app.use(express.json());
@@ -32,7 +33,8 @@ app.get('/talker/:id', async (request, response) => {
     response.status(HTTP_NOT_FOUND_STATUS).json({ message: 'Pessoa palestrante não encontrada' });
   }
 });
-app.post('/login', (_req, res) => {
+
+app.post('/login', validateRequest, (_req, res) => {
   const token = generateToken();
   res.status(HTTP_OK_STATUS).json({ token });
 });
